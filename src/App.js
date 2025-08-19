@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { BrowserRouter as Router, Routes, Route, Link, NavLink as RouterNavLink, useNavigate } from 'react-router-dom';
-import { FaFacebook, FaInstagram, FaYoutube, FaSignOutAlt, FaTachometerAlt } from 'react-icons/fa';
+import { FaFacebook, FaInstagram, FaYoutube, FaSignOutAlt } from 'react-icons/fa';
 import communityLogo from './images/orioz-logo.png';
 
 // Import AuthProvider and useAuth hook
@@ -138,18 +138,15 @@ function Navbar() {
             <NavLink to="/support">Support</NavLink>
           </div>
 
-          {/* Conditional Login/Dashboard/Logout Button */}
+          {/* Conditional Login/Logout */}
           {isLoggedIn ? (
-            <div className="flex items-center mt-4 md:mt-0 md:ml-6 space-x-2">
-              <span className="text-white text-lg font-medium whitespace-nowrap">
+            <div className="flex items-center mt-4 md:mt-0 md:ml-6 space-x-4">
+              <span
+                className="text-white text-lg font-medium whitespace-nowrap cursor-pointer hover:underline"
+                onClick={() => navigate('/dashboard')}
+              >
                 Hi, {user?.name?.split(' ')[0] || 'Member'}!
               </span>
-              <Link
-                to="/dashboard"
-                className="inline-flex items-center px-3 py-2 text-sm font-semibold rounded-lg shadow-md bg-blue-700 text-white hover:bg-blue-800 transition duration-300 transform hover:scale-105"
-              >
-                <FaTachometerAlt className="inline-block mr-1" /> Dashboard
-              </Link>
               <button
                 onClick={handleLogout}
                 className="inline-flex items-center px-3 py-2 text-sm font-semibold rounded-lg shadow-md bg-red-600 text-white hover:bg-red-700 transition duration-300 transform hover:scale-105"
