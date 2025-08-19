@@ -23,7 +23,7 @@ function RegisterPage() {
   const addressTypes = ['LOCAL', 'OVERSEAS', 'MAILING'];
   const contactTypes = ['LOCAL_PHONE', 'OVERSEAS_PHONE', 'EMAIL', 'WHATSAPP'];
   const contactMethods = ['PHONE', 'EMAIL', 'MESSAGING_APP'];
-  const countries = ['Australia', 'USA', 'Canada', 'UK', 'New Zealand']; // Example list
+  const countries = ['Australia', 'USA', 'Canada', 'UK', 'New Zealand', "India"]; 
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;

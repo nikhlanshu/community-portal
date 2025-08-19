@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { FaPhone, FaEnvelope, FaMapMarkerAlt, FaClock, FaFacebook, FaInstagram, FaYoutube } from 'react-icons/fa'; // Import social icons
+import { FaPhone, FaEnvelope, FaMapMarkerAlt, FaClock, FaFacebook, FaInstagram, FaYoutube } from 'react-icons/fa';
 
 function ContactUsPage() {
   const [formData, setFormData] = useState({
