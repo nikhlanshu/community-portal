@@ -3,7 +3,7 @@ import { BrowserRouter as Router, Routes, Route, Link, NavLink as RouterNavLink,
 import { FaFacebook, FaInstagram, FaYoutube, FaSignOutAlt } from 'react-icons/fa';
 import communityLogo from './images/orioz-logo.png';
 
-// Import AuthProvider and useAuth hook
+// Import AuthProvider and useAuth hook.
 import { AuthProvider, useAuth } from './context/AuthContext';
 
 // Import ProtectedRoute component
@@ -125,9 +125,8 @@ function Navbar() {
 
         {/* Navigation Links */}
         <div
-          className={`md:flex md:items-center md:ml-auto overflow-hidden transition-all duration-300 ${
-            isOpen ? 'max-h-screen mt-4' : 'max-h-0 md:max-h-full'
-          }`}
+          className={`md:flex md:items-center md:ml-auto overflow-hidden transition-all duration-300 ${isOpen ? 'max-h-screen mt-4' : 'max-h-0 md:max-h-full'
+            }`}
         >
           <div className="flex flex-col md:flex-row md:ml-auto items-start md:items-center">
             <NavLink to="/">Home</NavLink>
@@ -141,11 +140,15 @@ function Navbar() {
           {/* Conditional Login/Logout */}
           {isLoggedIn ? (
             <div className="flex items-center mt-4 md:mt-0 md:ml-6 space-x-4">
-              <span
-                className="text-white text-lg font-medium whitespace-nowrap cursor-pointer hover:underline"
-                onClick={() => navigate('/dashboard')}
-              >
-                Hi, {user?.name?.split(' ')[0] || 'Member'}!
+              <span className="text-white text-lg font-medium whitespace-nowrap">
+                Hi,&nbsp;
+                <button
+                  type="button"
+                  onClick={() => navigate('/dashboard')}
+                  className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg shadow-md transition duration-300 transform hover:scale-105 focus:outline-none"
+                >
+                  {user?.name?.split(' ')[0] || 'Member'}
+                </button>
               </span>
               <button
                 onClick={handleLogout}
@@ -173,8 +176,7 @@ const NavLink = ({ to, children }) => (
   <RouterNavLink
     to={to}
     className={({ isActive }) =>
-      `block py-2 px-4 rounded-lg md:inline-block md:ml-4 font-medium transition duration-300 focus:outline-none focus:ring-2 focus:ring-white focus:ring-opacity-75 ${
-        isActive ? 'bg-blue-800 text-white' : 'text-white hover:bg-blue-700 hover:text-white'
+      `block py-2 px-4 rounded-lg md:inline-block md:ml-4 font-medium transition duration-300 focus:outline-none focus:ring-2 focus:ring-white focus:ring-opacity-75 ${isActive ? 'bg-blue-800 text-white' : 'text-white hover:bg-blue-700 hover:text-white'
       }`
     }
   >
