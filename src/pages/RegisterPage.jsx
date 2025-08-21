@@ -1,5 +1,8 @@
 import React, { useState } from 'react';
-import { FaUser, FaEnvelope, FaLock, FaCalendarAlt, FaMapMarkerAlt, FaPhone, FaPlusCircle, FaMinusCircle } from 'react-icons/fa'; // Added icons for address/contact
+import {
+  FaUser, FaEnvelope, FaLock, FaCalendarAlt, FaMapMarkerAlt, FaPhone,
+  FaPlusCircle, FaMinusCircle
+} from 'react-icons/fa';
 
 function RegisterPage() {
   const [formData, setFormData] = useState({
@@ -11,24 +14,35 @@ function RegisterPage() {
     dateOfBirth: '',
     occupation: '',
     profilePictureUrl: '',
-    addresses: [{ type: 'LOCAL', street: '', city: '', state: '', zipCode: '', postCode: '', province: '', country: 'Australia', primary: true }],
-    contacts: [{ type: 'LOCAL_PHONE', value: '', method: 'PHONE', primary: true }],
+    addresses: [{
+      type: 'LOCAL',
+      street: '',
+      suburb: '',
+      city: '',
+      state: '',
+      country: 'Australia',
+      primary: true
+    }],
+    contacts: [{
+      type: 'LOCAL_PHONE',
+      value: '',
+      method: 'PHONE',
+      primary: true
+    }],
   });
-
   const [formErrors, setFormErrors] = useState({});
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [globalError, setGlobalError] = useState('');
 
-  // Pre-defined lists for dropdowns (you can expand these)
   const addressTypes = ['LOCAL', 'OVERSEAS', 'MAILING'];
   const contactTypes = ['LOCAL_PHONE', 'OVERSEAS_PHONE', 'EMAIL', 'WHATSAPP'];
   const contactMethods = ['PHONE', 'EMAIL', 'MESSAGING_APP'];
-  const countries = ['Australia', 'USA', 'Canada', 'UK', 'New Zealand', "India"]; 
+  const countries = ['Australia', 'USA', 'Canada', 'UK', 'New Zealand', 'India'];
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setFormData({ ...formData, [name]: value });
-    // Clear error for the field as user types
+
     if (formErrors[name]) {
       setFormErrors({ ...formErrors, [name]: '' });
     }
@@ -45,19 +59,29 @@ function RegisterPage() {
       newAddresses[index][name] = value;
     }
     setFormData({ ...formData, addresses: newAddresses });
-    setFormErrors({ ...formErrors, addresses: '' }); // Clear general address error
+    setFormErrors({ ...formErrors, addresses: '' });
   };
 
   const handleAddAddress = () => {
     setFormData({
       ...formData,
-      addresses: [...formData.addresses, { type: 'LOCAL', street: '', city: '', state: '', zipCode: '', postCode: '', province: '', country: 'Australia', primary: false }]
+      addresses: [
+        ...formData.addresses,
+        {
+          type: 'LOCAL',
+          street: '',
+          suburb: '',
+          city: '',
+          state: '',
+          country: 'Australia',
+          primary: false
+        }
+      ]
     });
   };
 
   const handleRemoveAddress = (index) => {
     const newAddresses = formData.addresses.filter((_, i) => i !== index);
-    // Ensure at least one address is primary if any exist
     if (newAddresses.length > 0 && !newAddresses.some(addr => addr.primary)) {
       newAddresses[0].primary = true;
     }
@@ -65,7 +89,7 @@ function RegisterPage() {
   };
 
   const handleContactChange = (index, e) => {
-    const { name, value, type, checked } = e.target;
+    const { name, value, checked } = e.target;
     const newContacts = [...formData.contacts];
     if (name === 'primary') {
       newContacts.forEach((contact, i) => {
@@ -75,19 +99,21 @@ function RegisterPage() {
       newContacts[index][name] = value;
     }
     setFormData({ ...formData, contacts: newContacts });
-    setFormErrors({ ...formErrors, contacts: '' }); // Clear general contact error
+    setFormErrors({ ...formErrors, contacts: '' });
   };
 
   const handleAddContact = () => {
     setFormData({
       ...formData,
-      contacts: [...formData.contacts, { type: 'LOCAL_PHONE', value: '', method: 'PHONE', primary: false }]
+      contacts: [
+        ...formData.contacts,
+        { type: 'LOCAL_PHONE', value: '', method: 'PHONE', primary: false }
+      ]
     });
   };
 
   const handleRemoveContact = (index) => {
     const newContacts = formData.contacts.filter((_, i) => i !== index);
-    // Ensure at least one contact is primary if any exist
     if (newContacts.length > 0 && !newContacts.some(contact => contact.primary)) {
       newContacts[0].primary = true;
     }
@@ -97,23 +123,29 @@ function RegisterPage() {
   const validateForm = () => {
     let errors = {};
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    // Password regex from your backend: At least 8 characters, one uppercase, one lowercase, one number, one special character
-    const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+    const passwordRegex =
+      /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
 
     if (!formData.firstName) errors.firstName = 'First name is required.';
-    else if (formData.firstName.length < 2 || formData.firstName.length > 50) errors.firstName = 'First name must be between 2 and 50 characters.';
+    else if (formData.firstName.length < 2 || formData.firstName.length > 50)
+      errors.firstName = 'First name must be between 2 and 50 characters.';
 
     if (!formData.lastName) errors.lastName = 'Last name is required.';
-    else if (formData.lastName.length < 2 || formData.lastName.length > 50) errors.lastName = 'Last name must be between 2 and 50 characters.';
+    else if (formData.lastName.length < 2 || formData.lastName.length > 50)
+      errors.lastName = 'Last name must be between 2 and 50 characters.';
 
     if (!formData.email) errors.email = 'Email is required.';
     else if (!emailRegex.test(formData.email)) errors.email = 'Email should be valid.';
-    else if (formData.email.length > 100) errors.email = 'Email cannot exceed 100 characters.';
+    else if (formData.email.length > 100)
+      errors.email = 'Email cannot exceed 100 characters.';
 
     if (!formData.password) errors.password = 'Password is required.';
-    else if (!passwordRegex.test(formData.password)) errors.password = 'Password must be at least 8 characters, include uppercase, lowercase, number, and special character.';
+    else if (!passwordRegex.test(formData.password))
+      errors.password =
+        'Password must be at least 8 characters, include uppercase, lowercase, number, and special character.';
 
-    if (formData.password !== formData.confirmPassword) errors.confirmPassword = 'Passwords do not match.';
+    if (formData.password !== formData.confirmPassword)
+      errors.confirmPassword = 'Passwords do not match.';
 
     if (!formData.dateOfBirth) errors.dateOfBirth = 'Date of Birth is required.';
     else {
@@ -127,10 +159,10 @@ function RegisterPage() {
     } else {
       formData.addresses.forEach((addr, index) => {
         if (!addr.street) errors[`addressStreet${index}`] = 'Street is required.';
+        if (!addr.suburb) errors[`addressSuburb${index}`] = 'Suburb is required.';
         if (!addr.city) errors[`addressCity${index}`] = 'City is required.';
         if (!addr.state) errors[`addressState${index}`] = 'State is required.';
         if (!addr.country) errors[`addressCountry${index}`] = 'Country is required.';
-        // You might want more specific validation for zipCode, postCode, province based on country
       });
       if (!formData.addresses.some(addr => addr.primary)) {
         errors.addresses = 'One address must be marked as primary.';
@@ -142,58 +174,55 @@ function RegisterPage() {
     } else {
       formData.contacts.forEach((contact, index) => {
         if (!contact.value) errors[`contactValue${index}`] = 'Contact value is required.';
-        // Add specific validation for email/phone if needed
       });
       if (!formData.contacts.some(contact => contact.primary)) {
         errors.contacts = 'One contact must be marked as primary.';
       }
     }
-
     setFormErrors(errors);
     return Object.keys(errors).length === 0;
   };
 
- const handleSubmit = async (e) => {
-  e.preventDefault();
-  setIsSubmitted(false);
-  setGlobalError('');
-
-  if (!validateForm()) {
-    setGlobalError('Please correct the errors in the form.');
-    return;
-  }
-
-  const dataToSend = { ...formData };
-  delete dataToSend.confirmPassword;
-
-  try {
-    const response = await fetch('http://localhost:8082/api/v1/members/register', {
-      method: 'POST',
-      headers: {
-        'Accept': 'application/json',
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(dataToSend),
-    });
-
-    if (response.ok) {
-      const result = await response.json();
-      setIsSubmitted(true);
-      setFormData({
-        firstName: '', lastName: '', email: '', password: '', confirmPassword: '', dateOfBirth: '',
-        occupation: '', profilePictureUrl: '',
-        addresses: [{ type: 'LOCAL', street: '', city: '', state: '', zipCode: '', postCode: '', province: '', country: 'Australia', primary: true }],
-        contacts: [{ type: 'LOCAL_PHONE', value: '', method: 'PHONE', primary: true }],
-      });
-    } else {
-      const errorData = await response.json();
-      setGlobalError(errorData.message || 'Registration failed. Please try again.');
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setIsSubmitted(false);
+    setGlobalError('');
+    if (!validateForm()) {
+      setGlobalError('Please correct the errors in the form.');
+      return;
     }
-  } catch (err) {
-    setGlobalError('An unexpected error occurred. Please try again later.');
-  }
-};
-
+    const dataToSend = { ...formData };
+    delete dataToSend.confirmPassword;
+    try {
+      const response = await fetch('http://localhost:8082/api/v1/members/register', {
+        method: 'POST',
+        headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(dataToSend),
+      });
+      if (response.ok) {
+        const result = await response.json();
+        setIsSubmitted(true);
+        setFormData({
+          firstName: '', lastName: '', email: '', password: '', confirmPassword: '', dateOfBirth: '',
+          occupation: '', profilePictureUrl: '',
+          addresses: [{
+            type: 'LOCAL', street: '', suburb: '', city: '', state: '', country: 'Australia', primary: true
+          }],
+          contacts: [{
+            type: 'LOCAL_PHONE', value: '', method: 'PHONE', primary: true
+          }],
+        });
+      } else {
+        const errorData = await response.json();
+        setGlobalError(errorData.message || 'Registration failed. Please try again.');
+      }
+    } catch (err) {
+      setGlobalError('An unexpected error occurred. Please try again later.');
+    }
+  };
 
   return (
     <div className="bg-gradient-to-br from-blue-50 to-indigo-100 py-16 px-4 sm:px-6 lg:px-8">
@@ -206,7 +235,6 @@ function RegisterPage() {
             Create your account and start connecting today!
           </p>
         </div>
-
         {isSubmitted && (
           <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative mb-6" role="alert">
             <strong className="font-bold">Success!</strong>
@@ -219,7 +247,6 @@ function RegisterPage() {
             <span className="block sm:inline ml-2">{globalError}</span>
           </div>
         )}
-
         <form onSubmit={handleSubmit} className="space-y-8">
           {/* Basic Information */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -256,7 +283,6 @@ function RegisterPage() {
               {formErrors.lastName && <p className="mt-2 text-sm text-red-600">{formErrors.lastName}</p>}
             </div>
           </div>
-
           <div>
             <label htmlFor="email" className="block text-lg font-medium text-gray-700 mb-2">Email Address</label>
             <div className="relative">
@@ -273,7 +299,6 @@ function RegisterPage() {
             </div>
             {formErrors.email && <p className="mt-2 text-sm text-red-600">{formErrors.email}</p>}
           </div>
-
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
               <label htmlFor="password" className="block text-lg font-medium text-gray-700 mb-2">Password</label>
@@ -308,7 +333,6 @@ function RegisterPage() {
               {formErrors.confirmPassword && <p className="mt-2 text-sm text-red-600">{formErrors.confirmPassword}</p>}
             </div>
           </div>
-
           <div>
             <label htmlFor="dateOfBirth" className="block text-lg font-medium text-gray-700 mb-2">Date of Birth</label>
             <div className="relative">
@@ -324,7 +348,6 @@ function RegisterPage() {
             </div>
             {formErrors.dateOfBirth && <p className="mt-2 text-sm text-red-600">{formErrors.dateOfBirth}</p>}
           </div>
-
           {/* Addresses Section */}
           <div className="border-t-2 border-indigo-200 pt-8 mt-8">
             <h3 className="text-3xl font-bold text-gray-800 mb-6 flex items-center">
@@ -363,6 +386,19 @@ function RegisterPage() {
                     {formErrors[`addressStreet${index}`] && <p className="mt-1 text-xs text-red-600">{formErrors[`addressStreet${index}`]}</p>}
                   </div>
                   <div>
+                    <label htmlFor={`addressSuburb${index}`} className="block text-base font-medium text-gray-700 mb-1">Suburb</label>
+                    <input
+                      type="text"
+                      name="suburb"
+                      id={`addressSuburb${index}`}
+                      value={address.suburb}
+                      onChange={(e) => handleAddressChange(index, e)}
+                      className={`mt-1 block w-full px-3 py-2 border ${formErrors[`addressSuburb${index}`] ? 'border-red-500' : 'border-gray-300'} rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-base`}
+                      placeholder="Chatswood"
+                    />
+                    {formErrors[`addressSuburb${index}`] && <p className="mt-1 text-xs text-red-600">{formErrors[`addressSuburb${index}`]}</p>}
+                  </div>
+                  <div>
                     <label htmlFor={`addressCity${index}`} className="block text-base font-medium text-gray-700 mb-1">City</label>
                     <input
                       type="text"
@@ -387,18 +423,6 @@ function RegisterPage() {
                       placeholder="NSW"
                     />
                     {formErrors[`addressState${index}`] && <p className="mt-1 text-xs text-red-600">{formErrors[`addressState${index}`]}</p>}
-                  </div>
-                  <div>
-                    <label htmlFor={`addressZipCode${index}`} className="block text-base font-medium text-gray-700 mb-1">Zip Code / Post Code</label>
-                    <input
-                      type="text"
-                      name="zipCode" // Using zipCode for general postal code input
-                      id={`addressZipCode${index}`}
-                      value={address.zipCode}
-                      onChange={(e) => handleAddressChange(index, e)}
-                      className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-base"
-                      placeholder="2000"
-                    />
                   </div>
                   <div>
                     <label htmlFor={`addressCountry${index}`} className="block text-base font-medium text-gray-700 mb-1">Country</label>
@@ -449,7 +473,6 @@ function RegisterPage() {
               <FaPlusCircle className="mr-2" /> Add Another Address
             </button>
           </div>
-
           {/* Contacts Section */}
           <div className="border-t-2 border-indigo-200 pt-8 mt-8">
             <h3 className="text-3xl font-bold text-gray-800 mb-6 flex items-center">
@@ -535,7 +558,6 @@ function RegisterPage() {
               <FaPlusCircle className="mr-2" /> Add Another Contact
             </button>
           </div>
-
           {/* Optional Fields */}
           <div className="border-t-2 border-indigo-200 pt-8 mt-8">
             <h3 className="text-3xl font-bold text-gray-800 mb-6 flex items-center">
@@ -566,7 +588,6 @@ function RegisterPage() {
               />
             </div>
           </div>
-
           {/* Submit Button */}
           <div className="pt-8">
             <button
