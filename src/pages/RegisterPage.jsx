@@ -153,57 +153,47 @@ function RegisterPage() {
     return Object.keys(errors).length === 0;
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setIsSubmitted(false);
-    setGlobalError('');
+ const handleSubmit = async (e) => {
+  e.preventDefault();
+  setIsSubmitted(false);
+  setGlobalError('');
 
-    if (!validateForm()) {
-      setGlobalError('Please correct the errors in the form.');
-      return;
-    }
+  if (!validateForm()) {
+    setGlobalError('Please correct the errors in the form.');
+    return;
+  }
 
-    // Prepare data for backend (excluding confirmPassword)
-    const dataToSend = { ...formData };
-    delete dataToSend.confirmPassword; // Remove client-only field
+  const dataToSend = { ...formData };
+  delete dataToSend.confirmPassword;
 
-    console.log('Registering member:', dataToSend);
-
-    // In a real application, you would send this data to your backend
-    // Example:
-    // try {
-    //   const response = await fetch('/api/register', { // Replace with your actual API endpoint
-    //     method: 'POST',
-    //     headers: {
-    //       'Content-Type': 'application/json',
-    //     },
-    //     body: JSON.stringify(dataToSend),
-    //   });
-    //   if (response.ok) {
-    //     setIsSubmitted(true);
-    //     setFormData({ // Reset form after successful submission
-    //       firstName: '', lastName: '', email: '', password: '', confirmPassword: '', dateOfBirth: '',
-    //       occupation: '', profilePictureUrl: '',
-    //       addresses: [{ type: 'LOCAL', street: '', city: '', state: '', zipCode: '', postCode: '', province: '', country: 'Australia', primary: true }],
-    //       contacts: [{ type: 'LOCAL_PHONE', value: '', method: 'PHONE', primary: true }],
-    //     });
-    //   } else {
-    //     const errorData = await response.json();
-    //     setGlobalError(errorData.message || 'Registration failed. Please try again.');
-    //   }
-    // } catch (err) {
-    //   setGlobalError('An unexpected error occurred. Please try again later.');
-    // }
-
-    // For demonstration purposes:
-    setIsSubmitted(true);
-    setFormData({ // Reset form after successful submission
-      firstName: '', lastName: '', email: '', password: '', confirmPassword: '', dateOfBirth: '',
-      occupation: '', profilePictureUrl: '',
-      addresses: [{ type: 'LOCAL', street: '', city: '', state: '', zipCode: '', postCode: '', province: '', country: 'Australia', primary: true }],
-      contacts: [{ type: 'LOCAL_PHONE', value: '', method: 'PHONE', primary: true }],
+  try {
+    const response = await fetch('http://localhost:8082/api/v1/members/register', {
+      method: 'POST',
+      headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(dataToSend),
     });
-  };
+
+    if (response.ok) {
+      const result = await response.json();
+      setIsSubmitted(true);
+      setFormData({
+        firstName: '', lastName: '', email: '', password: '', confirmPassword: '', dateOfBirth: '',
+        occupation: '', profilePictureUrl: '',
+        addresses: [{ type: 'LOCAL', street: '', city: '', state: '', zipCode: '', postCode: '', province: '', country: 'Australia', primary: true }],
+        contacts: [{ type: 'LOCAL_PHONE', value: '', method: 'PHONE', primary: true }],
+      });
+    } else {
+      const errorData = await response.json();
+      setGlobalError(errorData.message || 'Registration failed. Please try again.');
+    }
+  } catch (err) {
+    setGlobalError('An unexpected error occurred. Please try again later.');
+  }
+};
+
 
   return (
     <div className="bg-gradient-to-br from-blue-50 to-indigo-100 py-16 px-4 sm:px-6 lg:px-8">
