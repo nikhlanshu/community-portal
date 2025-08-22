@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { FaEnvelope, FaLock, FaSignInAlt } from 'react-icons/fa';
-import { useNavigate, Link } from 'react-router-dom'; // Import useNavigate and Link
-import { useAuth } from '../context/AuthContext'; // Import useAuth hook
+import { useNavigate, Link } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
 
 function LoginPage() {
   const [formData, setFormData] = useState({
@@ -13,8 +13,8 @@ function LoginPage() {
   const [globalError, setGlobalError] = useState('');
   const [loading, setLoading] = useState(false);
 
-  const navigate = useNavigate(); // Initialize navigate hook
-  const { login } = useAuth(); // Get the login function from AuthContext
+  const navigate = useNavigate();
+  const { login } = useAuth();
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -55,28 +55,35 @@ function LoginPage() {
       return;
     }
 
-    console.log('Attempting to log in with:', formData);
-
     try {
-      // --- Mock Login for Demonstration ---
-      await new Promise(resolve => setTimeout(resolve, 1500)); // Simulate network delay
-      if (formData.email === 'test@example.com' && formData.password === 'Password123!') {
-        const userData = { // Mock user data
-          name: 'Community Member',
-          email: formData.email,
-          memberSince: '2023-01-15',
-          state: 'QLD',
-          // Add other user profile data you might want to display
-        };
-        login(userData); // Call login from AuthContext
-        setGlobalError('Login successful! Redirecting to Dashboard...');
-        setTimeout(() => navigate('/dashboard'), 500); // Redirect after a short delay
-      } else {
-        setGlobalError('Invalid email or password.');
-      }
+      const response = await fetch('http://localhost:8082/api/v1/members/auth/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+        },
+        body: JSON.stringify(formData),
+      });
 
+      if (response.ok) {
+        const data = await response.json();
+        console.log('Login sucessfull')
+        login(data.accessToken || data); // Store user info in context
+        setGlobalError('');
+        setTimeout(() => navigate('/dashboard'), 800);
+      } else {
+        let errData;
+        try {
+          errData = await response.json();
+        } catch {
+          errData = null;
+        }
+        setGlobalError(
+          (errData && errData.message) ||
+          'Invalid email or password.'
+        );
+      }
     } catch (err) {
-      console.error('Login error:', err);
       setGlobalError('An unexpected error occurred. Please try again later.');
     } finally {
       setLoading(false);
@@ -96,7 +103,7 @@ function LoginPage() {
         </div>
 
         {globalError && (
-          <div className={`px-4 py-3 rounded relative mb-6 ${globalError.includes('successful') ? 'bg-green-100 border-green-400 text-green-700' : 'bg-red-100 border-red-400 text-red-700'}`} role="alert">
+          <div className={`px-4 py-3 rounded relative mb-6 border ${globalError.includes('successful') ? 'bg-green-100 border-green-400 text-green-700' : 'bg-red-100 border-red-400 text-red-700'}`} role="alert">
             <strong className="font-bold">{globalError.includes('successful') ? 'Success!' : 'Error!'}</strong>
             <span className="block sm:inline ml-2">{globalError}</span>
           </div>
