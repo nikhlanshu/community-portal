@@ -147,7 +147,7 @@ function Navbar() {
                   onClick={() => navigate('/dashboard')}
                   className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg shadow-md transition duration-300 transform hover:scale-105 focus:outline-none"
                 >
-                  {user?.name?.split(' ')[0] || 'Member'}
+                  {user?.firstName}
                 </button>
               </span>
               <button

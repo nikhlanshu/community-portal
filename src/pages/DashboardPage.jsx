@@ -2,8 +2,7 @@ import React from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate, Link } from 'react-router-dom';
 import { FaUserCircle, FaSignOutAlt, FaCalendarAlt, FaCog, FaChartLine, FaEnvelope } from 'react-icons/fa';
-import { format } from 'date-fns';
-import { parseISO } from 'date-fns';
+import { format, parseISO, isValid } from 'date-fns';
 
 function DashboardPage() {
   const { user, logout } = useAuth();
@@ -11,19 +10,37 @@ function DashboardPage() {
 
   const handleLogout = () => {
     logout();
-    navigate('/'); // Redirect to home page after logout
+    navigate('/');
   };
 
   if (!user) {
-    // This case should ideally be caught by ProtectedRoute, but good for safety
     return (
       <div className="text-center py-20 bg-gradient-to-br from-blue-50 to-indigo-100 min-h-screen flex items-center justify-center">
         <p className="text-xl text-gray-700">Loading user data or not logged in...</p>
       </div>
     );
   }
+  console.log("user in dashboard page ", user);
+  // Decide which name to show
+  const userName = user.firstName;  
 
-  // Mock data for dashboard summary (you'd fetch this from backend normally)
+  console.log("user in dashboard page ", user);
+  // Choose memberSince, falling back to dateOfBirth or none
+  let memberSinceFormatted = 'Not provided';
+  let dateString = user.memberSince || user.dateOfBirth;
+  if (dateString) {
+    try {
+      const parsed = parseISO(dateString);
+      memberSinceFormatted = isValid(parsed)
+        ? format(parsed, 'MMMM do, yyyy')
+        : dateString;
+    } catch {
+      memberSinceFormatted = dateString;
+    }
+  }
+
+  const userState = user.state || user.province || 'Not provided';
+
   const mockDashboardData = {
     upcomingEventsCount: 2,
     unreadMessages: 1,
@@ -38,7 +55,7 @@ function DashboardPage() {
         <div className="text-center mb-12">
           <FaUserCircle className="text-indigo-600 text-8xl mx-auto mb-4" />
           <h1 className="text-5xl font-extrabold text-gray-900 mb-2 drop-shadow-lg">
-            Welcome, {user.name}!
+            Welcome, {userName}!
           </h1>
           <p className="text-xl text-gray-700">Your personalized community hub.</p>
         </div>
@@ -51,7 +68,7 @@ function DashboardPage() {
             <h3 className="text-xl font-bold text-gray-900 mb-2">My Profile</h3>
             <p className="text-gray-700 mb-4">Manage your personal information and settings.</p>
             <Link
-              to="/dashboard/profile" // Link to a hypothetical profile settings page
+              to="/dashboard/profile"
               className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700"
             >
               View Profile
@@ -82,7 +99,7 @@ function DashboardPage() {
             <h3 className="text-xl font-bold text-gray-900 mb-2">My Messages</h3>
             <p className="text-gray-700 mb-4">You have {mockDashboardData.unreadMessages} unread message(s).</p>
             <Link
-              to="/dashboard/messages" // Link to a hypothetical messages inbox
+              to="/dashboard/messages"
               className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-purple-600 hover:bg-purple-700"
             >
               Go to Inbox
@@ -97,12 +114,12 @@ function DashboardPage() {
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-lg text-gray-700">
             <div>
-              <p className="mb-2"><strong>Name:</strong> {user.name}</p>
-              <p className="mb-2"><strong>Email:</strong> {user.email}</p>
+              <p className="mb-2"><strong>Name:</strong> {userName}</p>
+              <p className="mb-2"><strong>Email:</strong> {user.email || 'Not provided'}</p>
             </div>
             <div>
-              <p className="mb-2"><strong>Member Since:</strong> {format(parseISO(user.memberSince), 'MMMM do, yyyy')}</p>
-              <p className="mb-2"><strong>State:</strong> {user.state}</p>
+              <p className="mb-2"><strong>Member Since:</strong> {memberSinceFormatted}</p>
+              <p className="mb-2"><strong>State:</strong> {userState}</p>
             </div>
           </div>
         </div>
