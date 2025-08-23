@@ -58,8 +58,14 @@ function LoginPage() {
 
       if (response.ok) {
         const data = await response.json();
-        // Decode idToken and accessToken
+
+        // Check for tokens and store them in localStorage
         if (data.idToken && data.accessToken) {
+          localStorage.setItem('accessToken', data.accessToken);
+          if (data.refreshToken) {
+            localStorage.setItem('refreshToken', data.refreshToken);
+          }
+
           let userFromToken, accessPayload;
           try {
             userFromToken = jwtDecode(data.idToken);
@@ -69,11 +75,13 @@ function LoginPage() {
             setLoading(false);
             return;
           }
-          // Attach roles to user
+
           userFromToken.roles = accessPayload.roles || [];
           userFromToken.status = accessPayload.status;
-          // Save user (with roles) to context
+
+          // Save user info in your auth context
           login(userFromToken);
+
           setGlobalError('');
           setTimeout(() => navigate('/dashboard'), 800);
         } else {
@@ -103,14 +111,23 @@ function LoginPage() {
           <p className="text-lg text-gray-700">Sign in to your ORIOZ Inc. account.</p>
         </div>
         {globalError && (
-          <div className={`px-4 py-3 rounded relative mb-6 border ${globalError.includes('successful') ? 'bg-green-100 border-green-400 text-green-700' : 'bg-red-100 border-red-400 text-red-700'}`} role="alert">
+          <div
+            className={`px-4 py-3 rounded relative mb-6 border ${
+              globalError.includes('successful')
+                ? 'bg-green-100 border-green-400 text-green-700'
+                : 'bg-red-100 border-red-400 text-red-700'
+            }`}
+            role="alert"
+          >
             <strong className="font-bold">{globalError.includes('successful') ? 'Success!' : 'Error!'}</strong>
             <span className="block sm:inline ml-2">{globalError}</span>
           </div>
         )}
         <form onSubmit={handleSubmit} className="space-y-6">
           <div>
-            <label htmlFor="email" className="block text-lg font-medium text-gray-700 mb-2">Email Address</label>
+            <label htmlFor="email" className="block text-lg font-medium text-gray-700 mb-2">
+              Email Address
+            </label>
             <div className="relative">
               <FaEnvelope className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
               <input
@@ -119,7 +136,9 @@ function LoginPage() {
                 id="email"
                 value={formData.email}
                 onChange={handleInputChange}
-                className={`pl-10 mt-1 block w-full px-4 py-3 border ${formErrors.email ? 'border-red-500' : 'border-gray-300'} rounded-lg shadow-sm focus:ring-indigo-500 focus:border-indigo-500 text-gray-900 placeholder-gray-400 text-lg`}
+                className={`pl-10 mt-1 block w-full px-4 py-3 border ${
+                  formErrors.email ? 'border-red-500' : 'border-gray-300'
+                } rounded-lg shadow-sm focus:ring-indigo-500 focus:border-indigo-500 text-gray-900 placeholder-gray-400 text-lg`}
                 placeholder="you@example.com"
                 required
               />
@@ -127,7 +146,9 @@ function LoginPage() {
             {formErrors.email && <p className="mt-2 text-sm text-red-600">{formErrors.email}</p>}
           </div>
           <div>
-            <label htmlFor="password" className="block text-lg font-medium text-gray-700 mb-2">Password</label>
+            <label htmlFor="password" className="block text-lg font-medium text-gray-700 mb-2">
+              Password
+            </label>
             <div className="relative">
               <FaLock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
               <input
@@ -136,14 +157,19 @@ function LoginPage() {
                 id="password"
                 value={formData.password}
                 onChange={handleInputChange}
-                className={`pl-10 mt-1 block w-full px-4 py-3 border ${formErrors.password ? 'border-red-500' : 'border-gray-300'} rounded-lg shadow-sm focus:ring-indigo-500 focus:border-indigo-500 text-gray-900 text-lg`}
+                className={`pl-10 mt-1 block w-full px-4 py-3 border ${
+                  formErrors.password ? 'border-red-500' : 'border-gray-300'
+                } rounded-lg shadow-sm focus:ring-indigo-500 focus:border-indigo-500 text-gray-900 text-lg`}
                 placeholder="********"
                 required
               />
             </div>
             {formErrors.password && <p className="mt-2 text-sm text-red-600">{formErrors.password}</p>}
             <div className="mt-4 text-right">
-              <Link to="/forgot-password" className="text-indigo-600 hover:text-indigo-800 text-base font-medium transition duration-300">
+              <Link
+                to="/forgot-password"
+                className="text-indigo-600 hover:text-indigo-800 text-base font-medium transition duration-300"
+              >
                 Forgot your password?
               </Link>
             </div>
@@ -154,7 +180,12 @@ function LoginPage() {
             disabled={loading}
           >
             {loading ? (
-              <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+              <svg
+                className="animate-spin -ml-1 mr-3 h-5 w-5 text-white"
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+              >
                 <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                 <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
               </svg>
@@ -165,7 +196,8 @@ function LoginPage() {
           </button>
         </form>
         <div className="mt-8 text-center text-gray-600">
-          <p>Don't have an account?{' '}
+          <p>
+            Don't have an account?{' '}
             <Link to="/register" className="text-indigo-600 hover:text-indigo-800 font-semibold transition duration-300">
               Register here
             </Link>
