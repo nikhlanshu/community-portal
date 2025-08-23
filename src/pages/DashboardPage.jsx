@@ -1,7 +1,7 @@
 import React from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate, Link } from 'react-router-dom';
-import { FaUserCircle, FaSignOutAlt, FaCalendarAlt, FaCog, FaChartLine, FaEnvelope } from 'react-icons/fa';
+import { FaUserCircle, FaSignOutAlt, FaCalendarAlt, FaCog, FaChartLine, FaEnvelope, FaUserShield, FaPlus, FaNewspaper } from 'react-icons/fa';
 import { format, parseISO, isValid } from 'date-fns';
 
 function DashboardPage() {
@@ -20,11 +20,10 @@ function DashboardPage() {
       </div>
     );
   }
-  console.log("user in dashboard page ", user);
-  // Decide which name to show
-  const userName = user.firstName;  
 
-  console.log("user in dashboard page ", user);
+  // Decide which name to show
+  const userName = user.firstName;
+
   // Choose memberSince, falling back to dateOfBirth or none
   let memberSinceFormatted = 'Not provided';
   let dateString = user.memberSince || user.dateOfBirth;
@@ -49,6 +48,10 @@ function DashboardPage() {
     nextEventDate: "2025-07-20T10:00:00",
   };
 
+  // ADMIN CHECK
+  const userRoles = user?.roles || [];
+  const isAdmin = userRoles.includes('ADMIN');
+
   return (
     <div className="bg-gradient-to-br from-blue-50 to-indigo-100 py-16 px-4 sm:px-6 lg:px-8 min-h-screen">
       <div className="max-w-7xl mx-auto">
@@ -59,6 +62,45 @@ function DashboardPage() {
           </h1>
           <p className="text-xl text-gray-700">Your personalized community hub.</p>
         </div>
+
+        {/* --- ADMIN ONLY SECTION --- */}
+        {isAdmin && (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-12">
+            {/* Moderate memberships */}
+            <div className="bg-white rounded-2xl shadow-xl p-6 text-center hover:scale-105 hover:shadow-2xl transition-transform">
+              <FaUserShield className="text-orange-500 text-4xl mx-auto mb-3" />
+              <h3 className="text-xl font-bold text-gray-900 mb-2">Moderate Memberships</h3>
+              <p className="text-gray-700 mb-4">Approve or reject new registrations.</p>
+              <Link
+                to="/dashboard/admin/review-members"
+                className="inline-flex items-center px-4 py-2 border border-transparent rounded-md text-white bg-orange-600 hover:bg-orange-700 font-medium shadow-sm">
+                Review Members
+              </Link>
+            </div>
+            {/* Add New Event */}
+            <div className="bg-white rounded-2xl shadow-xl p-6 text-center hover:scale-105 hover:shadow-2xl transition-transform">
+              <FaPlus className="text-green-500 text-4xl mx-auto mb-3" />
+              <h3 className="text-xl font-bold text-gray-900 mb-2">Add Event</h3>
+              <p className="text-gray-700 mb-4">Create a new community event.</p>
+              <Link
+                to="/dashboard/admin/events/new"
+                className="inline-flex items-center px-4 py-2 border border-transparent rounded-md text-white bg-green-600 hover:bg-green-700 font-medium shadow-sm">
+                Add Event
+              </Link>
+            </div>
+            {/* Add News */}
+            <div className="bg-white rounded-2xl shadow-xl p-6 text-center hover:scale-105 hover:shadow-2xl transition-transform">
+              <FaNewspaper className="text-indigo-500 text-4xl mx-auto mb-3" />
+              <h3 className="text-xl font-bold text-gray-900 mb-2">Add News</h3>
+              <p className="text-gray-700 mb-4">Post community news and updates.</p>
+              <Link
+                to="/dashboard/admin/news/new"
+                className="inline-flex items-center px-4 py-2 border border-transparent rounded-md text-white bg-indigo-600 hover:bg-indigo-700 font-medium shadow-sm">
+                Add News
+              </Link>
+            </div>
+          </div>
+        )}
 
         {/* Quick Actions / Summary Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-12">
@@ -74,7 +116,6 @@ function DashboardPage() {
               View Profile
             </Link>
           </div>
-
           {/* Upcoming Events Summary */}
           <div className="bg-white rounded-2xl shadow-xl p-6 text-center transform transition-transform duration-300 hover:scale-105 hover:shadow-2xl">
             <FaCalendarAlt className="text-green-500 text-4xl mx-auto mb-3" />
@@ -92,7 +133,6 @@ function DashboardPage() {
               View All Events
             </Link>
           </div>
-
           {/* Recent Activity / Messages */}
           <div className="bg-white rounded-2xl shadow-xl p-6 text-center transform transition-transform duration-300 hover:scale-105 hover:shadow-2xl">
             <FaEnvelope className="text-purple-500 text-4xl mx-auto mb-3" />

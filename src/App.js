@@ -21,6 +21,7 @@ import LoginPage from './pages/LoginPage';
 import TermsOfServicePage from './pages/TermsOfServicePage';
 import SupportPage from './pages/SupportPage';
 import DashboardPage from './pages/DashboardPage';
+import ReviewMembersPage from './pages/ReviewMembersPage';
 
 // --- Main Application Component ---
 function App() {
@@ -65,6 +66,14 @@ function App() {
                 element={
                   <ProtectedRoute>
                     <PlaceholderPage title="Messages Inbox" />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/dashboard/admin/review-members"
+                element={
+                  <ProtectedRoute>
+                    <ReviewMembersPage />
                   </ProtectedRoute>
                 }
               />

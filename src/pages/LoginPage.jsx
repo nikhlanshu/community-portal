@@ -58,18 +58,21 @@ function LoginPage() {
 
       if (response.ok) {
         const data = await response.json();
-        // Decode idToken to get user fields
-        if (data.idToken) {
-          let userFromToken;
+        // Decode idToken and accessToken
+        if (data.idToken && data.accessToken) {
+          let userFromToken, accessPayload;
           try {
             userFromToken = jwtDecode(data.idToken);
+            accessPayload = jwtDecode(data.accessToken);
           } catch (decodeError) {
             setGlobalError('Failed to decode authentication token.');
             setLoading(false);
             return;
           }
-          // Optionally, add fields from the accessToken JWT, or store both if needed.
-          console.log("docoded ID token ", userFromToken);
+          // Attach roles to user
+          userFromToken.roles = accessPayload.roles || [];
+          userFromToken.status = accessPayload.status;
+          // Save user (with roles) to context
           login(userFromToken);
           setGlobalError('');
           setTimeout(() => navigate('/dashboard'), 800);
