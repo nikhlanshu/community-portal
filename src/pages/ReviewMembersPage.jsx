@@ -83,21 +83,11 @@ function ReviewMembersPage() {
                     {member.firstName} {member.lastName}
                   </div>
                   <div className="text-gray-700">{member.email}</div>
-                  <div className="text-gray-600">
-                    Member Since:{' '}
-                    {member.memberSince && member.memberSince.slice(0, 10)}
-                  </div>
                   <div className="text-gray-600">Occupation: {member.occupation || 'N/A'}</div>
-                  <div className="text-gray-600">
-                    Address:{' '}
-                    {member.addresses && member.addresses[0] ? (
-                      <>
-                        {member.addresses.street}, {member.addresses.city},{' '}
-                        {member.addresses.state}
-                      </>
-                    ) : (
-                      'N/A'
-                    )}
+                  <div className="text-gray-500 text-sm mt-1">
+                    State: {member.addresses
+                      ?.find(addr => addr.type?.toLowerCase() === "local")
+                      ?.state || "N/A"}
                   </div>
                   <div className="text-gray-500 text-sm mt-1">Status: Pending</div>
                 </div>
