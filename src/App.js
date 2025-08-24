@@ -24,6 +24,7 @@ import DashboardPage from './pages/DashboardPage';
 import ReviewMembersPage from './pages/ReviewMembersPage';
 import ApproveMemberPage from './pages/ApproveMemberPage';
 import RejectMemberPage from './pages/RejectMemberPage';
+import ProfilePage from './pages/ProfilePage';
 
 // --- Main Application Component ---
 function App() {
@@ -59,7 +60,7 @@ function App() {
                 path="/dashboard/profile"
                 element={
                   <ProtectedRoute>
-                    <PlaceholderPage title="Profile Settings" />
+                    <ProfilePage title="Profile Settings" />
                   </ProtectedRoute>
                 }
               />
