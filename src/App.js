@@ -22,6 +22,8 @@ import TermsOfServicePage from './pages/TermsOfServicePage';
 import SupportPage from './pages/SupportPage';
 import DashboardPage from './pages/DashboardPage';
 import ReviewMembersPage from './pages/ReviewMembersPage';
+import ApproveMemberPage from './pages/ApproveMemberPage';
+import RejectMemberPage from './pages/RejectMemberPage';
 
 // --- Main Application Component ---
 function App() {
@@ -77,7 +79,22 @@ function App() {
                   </ProtectedRoute>
                 }
               />
-
+              <Route
+                path="/dashboard/admin/members/:email/approve"
+                element={
+                  <ProtectedRoute>
+                    <ApproveMemberPage />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/dashboard/admin/members/:email/reject"
+                element={
+                  <ProtectedRoute>
+                    <RejectMemberPage />
+                  </ProtectedRoute>
+                }
+              />
               <Route path="*" element={<PlaceholderPage title="Page Not Found" />} />
             </Routes>
           </main>

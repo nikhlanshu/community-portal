@@ -1,14 +1,12 @@
 import React, { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 function ReviewMembersPage() {
   const [members, setMembers] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [actionLoading, setActionLoading] = useState(false);
   const [error, setError] = useState('');
-
-  // Use localStorage or a centralized axios instance for token
   const accessToken = localStorage.getItem('accessToken');
-  console.log("Getting value from localstorage: ", accessToken)
+  const navigate = useNavigate();
 
   useEffect(() => {
     async function fetchPendingMembers() {
@@ -33,26 +31,6 @@ function ReviewMembersPage() {
     }
     fetchPendingMembers();
   }, [accessToken]);
-
-  const handleAction = async (memberId, action) => {
-    setActionLoading(memberId);
-    try {
-      const response = await fetch(`http://localhost:8082/api/v1/admin/members/${memberId}/${action}`, {
-        method: 'PATCH',
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-          'Content-Type': 'application/json',
-
-        },
-      });
-      if (!response.ok) throw new Error(`${action} failed`);
-      setMembers(prev => prev.filter(m => m.id !== memberId));
-    } catch {
-      alert(`Failed to ${action} member`);
-    } finally {
-      setActionLoading(false);
-    }
-  };
 
   return (
     <div className="bg-gradient-to-br from-blue-50 to-indigo-100 py-8 px-4 min-h-screen">
@@ -93,18 +71,16 @@ function ReviewMembersPage() {
                 </div>
                 <div className="ml-8 flex flex-col gap-2">
                   <button
-                    className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 font-medium disabled:opacity-50"
-                    disabled={!!actionLoading}
-                    onClick={() => handleAction(member.email, 'confirm')}
+                    className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 font-medium"
+                    onClick={() => navigate(`/dashboard/admin/members/${member.email}/approve`)}
                   >
-                    {actionLoading === member.id ? 'Approving...' : 'Approve'}
+                    Approve
                   </button>
                   <button
-                    className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 font-medium disabled:opacity-50"
-                    disabled={!!actionLoading}
-                    onClick={() => handleAction(member.email, 'reject')}
+                    className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 font-medium"
+                    onClick={() => navigate(`/dashboard/admin/members/${member.email}/reject`)}
                   >
-                    {actionLoading === member.id ? 'Rejecting...' : 'Reject'}
+                    Reject
                   </button>
                 </div>
               </li>

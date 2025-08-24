@@ -19,6 +19,7 @@ function ApproveMemberPage() {
         });
         if (!response.ok) throw new Error('Approval failed.');
         setStatus('success');
+        
         // After a delay, navigate back or elsewhere
         setTimeout(() => {
           navigate('/dashboard/admin/review-members');
