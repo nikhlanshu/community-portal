@@ -39,8 +39,10 @@ function ReviewMembersPage() {
         {error && <div className="text-red-600 font-semibold mb-4">{error}</div>}
         {loading ? (
           <div className="text-center py-6 text-lg text-gray-700">Loading...</div>
-        ) : members.length === 0 ? (
-          <div className="text-center py-6 text-lg text-gray-700">No pending members found.</div>
+        ) : (members.length === 0 && !error)  ? (
+          <div className="text-center py-6 text-lg text-gray-700">
+            No pending members found.
+            </div>
         ) : (
           <ul>
             {members.map(member => (
