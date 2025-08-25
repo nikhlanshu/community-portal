@@ -24,7 +24,7 @@ export const AuthProvider = ({ children }) => {
   });
 
   // Idle logout
-  const idleTimeout = 30 * 60 * 1000; // 30 minutes
+  const idleTimeout = 15 * 60 * 1000;
   useEffect(() => {
     let timer;
 
