@@ -61,11 +61,8 @@ function LoginPage() {
 
         // Check for tokens and store them in localStorage
         if (data.idToken && data.accessToken) {
-          localStorage.setItem('accessToken', data.accessToken);
-          if (data.refreshToken) {
-            localStorage.setItem('refreshToken', data.refreshToken);
-          }
-
+          sessionStorage.setItem('accessToken', data.accessToken);
+          sessionStorage.setItem('idToken', data.idToken);
           let userFromToken, accessPayload;
           try {
             userFromToken = jwtDecode(data.idToken);
