@@ -5,7 +5,7 @@ function ApproveMemberPage() {
   const { email } = useParams();
   const [status, setStatus] = useState('pending'); // pending, success, error
   const [errorMsg, setErrorMsg] = useState('');
-  const accessToken = localStorage.getItem('accessToken');
+  const accessToken = sessionStorage.getItem('accessToken');
   const navigate = useNavigate();
 
   useEffect(() => {

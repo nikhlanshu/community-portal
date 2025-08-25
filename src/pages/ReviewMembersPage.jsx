@@ -5,7 +5,7 @@ function ReviewMembersPage() {
   const [members, setMembers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-  const accessToken = localStorage.getItem('accessToken');
+  const accessToken = sessionStorage.getItem('accessToken');
   const navigate = useNavigate();
 
   useEffect(() => {
