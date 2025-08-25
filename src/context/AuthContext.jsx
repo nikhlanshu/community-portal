@@ -8,10 +8,7 @@ export const useAuth = () => useContext(AuthContext);
 export const AuthProvider = ({ children }) => {
   const navigate = useNavigate();
 
-  const [isLoggedIn, setIsLoggedIn] = useState(() => {
-    const token = sessionStorage.getItem('accessToken');
-    return !!token;
-  });
+  const [isLoggedIn, setIsLoggedIn] = useState(() => !!sessionStorage.getItem('accessToken'));
 
   const [user, setUser] = useState(() => {
     const storedUser = sessionStorage.getItem('currentUser');
@@ -23,8 +20,24 @@ export const AuthProvider = ({ children }) => {
     }
   });
 
+  const logout = () => {
+    setIsLoggedIn(false);
+    setUser(null);
+    sessionStorage.clear();
+    navigate('/login');
+  };
+
+  const login = (userData, tokens) => {
+    setIsLoggedIn(true);
+    setUser(userData);
+    sessionStorage.setItem('accessToken', tokens.accessToken);
+    sessionStorage.setItem('idToken', tokens.idToken);
+    sessionStorage.setItem('refreshToken', tokens.refreshToken);
+    sessionStorage.setItem('currentUser', JSON.stringify(userData));
+  };
+
   // Idle logout
-  const idleTimeout = 15 * 60 * 1000;
+  const idleTimeout = 30 * 60 * 1000; // 30 minutes
   useEffect(() => {
     let timer;
 
@@ -45,54 +58,98 @@ export const AuthProvider = ({ children }) => {
       window.removeEventListener('keypress', resetTimer);
       window.removeEventListener('click', resetTimer);
     };
-  }, []);
+  }, [logout]);
 
-  // Auto-refresh access token for active users
-  useEffect(() => {
-    let interval;
-    if (isLoggedIn) {
-      interval = setInterval(() => {
-        const refreshToken = sessionStorage.getItem('refreshToken');
-        if (!refreshToken) return logout();
+  // API helper integrated with AuthContext
+  const PUBLIC_PATHS = [
+    '/api/v1/members/register',
+    '/api/v1/members/auth/login',
+    '/api/v1/token',
+    '/api/v1/token/',
+    '/api/v1/token/refresh',
+  ];
 
-        fetch('http://localhost:8082/api/v1/members/auth/refresh', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ refreshToken }),
-        })
-          .then(res => {
-            if (!res.ok) throw new Error('Refresh failed');
-            return res.json();
-          })
-          .then(data => {
-            if (data.accessToken) {
-              sessionStorage.setItem('accessToken', data.accessToken);
-            } else {
-              logout();
-            }
-          })
-          .catch(() => logout());
-      }, 5 * 60 * 1000); // every 5 mins
+  const isPublicPath = (url) => PUBLIC_PATHS.some(path => url.includes(path));
+
+  const decodeJwt = (token) => {
+    try {
+      return JSON.parse(atob(token.split('.')[1]));
+    } catch (err) {
+      console.error('Failed to decode JWT', err);
+      return null;
+    }
+  };
+
+  const refreshAccessToken = async () => {
+    const refreshToken = sessionStorage.getItem('refreshToken');
+    if (!refreshToken) return null;
+
+    try {
+      const res = await fetch('http://localhost:8082/api/v1/token/refresh', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ token: refreshToken }),
+      });
+
+      if (!res.ok) throw new Error('Refresh failed');
+
+      const data = await res.json();
+      if (data.accessToken) {
+        sessionStorage.setItem('accessToken', data.accessToken);
+        return data.accessToken;
+      } else {
+        logout();
+        return null;
+      }
+    } catch (err) {
+      console.error('Token refresh error', err);
+      logout();
+      return null;
+    }
+  };
+
+  const ensureAccessToken = async () => {
+    let token = sessionStorage.getItem('accessToken');
+    if (!token) return null;
+
+    const payload = decodeJwt(token);
+    const now = Math.floor(Date.now() / 1000);
+
+    if (!payload || payload.exp <= now) {
+      token = await refreshAccessToken();
     }
 
-    return () => clearInterval(interval);
-  }, [isLoggedIn]);
-
-  const login = (userData, tokens) => {
-    setIsLoggedIn(true);
-    setUser(userData);
-    sessionStorage.setItem('accessToken', tokens.accessToken);
-    sessionStorage.setItem('idToken', tokens.idToken);
-    sessionStorage.setItem('currentUser', JSON.stringify(userData));
+    return token;
   };
 
-  const logout = () => {
-    setIsLoggedIn(false);
-    setUser(null);
-    sessionStorage.clear();
-    navigate('/login');
+  const apiCall = async (url, options = {}) => {
+    if (!isPublicPath(url)) {
+      const token = await ensureAccessToken();
+      if (!token) throw new Error('No valid access token');
+
+      options.headers = {
+        ...options.headers,
+        Authorization: `Bearer ${token}`,
+        'Content-Type': 'application/json',
+      };
+    } else {
+      options.headers = {
+        ...options.headers,
+        'Content-Type': 'application/json',
+      };
+    }
+
+    const res = await fetch(url, options);
+    if (!res.ok) {
+      const errorData = await res.json().catch(() => null);
+      const error = new Error('API call failed');
+      error.response = errorData || res.statusText;
+      throw error;
+    }
+
+    return res.json();
   };
 
-  const value = { isLoggedIn, user, login, logout };
+  const value = { isLoggedIn, user, login, logout, apiCall };
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };

@@ -1,81 +1,94 @@
-import axios from 'axios';
-
-const api = axios.create({
-  baseURL: 'http://localhost:8082',
-  headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
-});
-
-// List of public endpoints (no token needed)
-const publicEndpoints = [
+// api.js
+const PUBLIC_PATHS = [
   '/api/v1/members/register',
   '/api/v1/members/auth/login',
   '/api/v1/token',
+  '/api/v1/token/',
   '/api/v1/token/refresh',
 ];
 
-// Request interceptor - add token only to secured endpoints
-api.interceptors.request.use(config => {
-  // Check if the request URL is a public endpoint
-  console.log("Inside intercepter ", config.url)
-  const isPublic = publicEndpoints.some(path => 
-    config.url === path || config.url?.startsWith(path + '/')
-  );
+// Check if URL is public
+const isPublicPath = (url) => PUBLIC_PATHS.some(path => url.includes(path));
 
-  console.log("isPublic value intercepter ", isPublic)
-  if (!isPublic) {
-    // For secured endpoints, attach access token if available
-    const token = localStorage.getItem('accessToken');
-    if (token) {
-        console.log("token from localStorage ", token)
-      config.headers['Authorization'] = `Bearer ${token}`;
+// Decode JWT payload
+const decodeJwt = (token) => {
+  try {
+    return JSON.parse(atob(token.split('.')[1]));
+  } catch (err) {
+    console.error('Failed to decode JWT', err);
+    return null;
+  }
+};
+
+// Refresh access token if expired
+const refreshAccessToken = async () => {
+  const refreshToken = sessionStorage.getItem('refreshToken');
+  if (!refreshToken) return null;
+
+  try {
+    const res = await fetch('http://localhost:8082/api/v1/token/refresh', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ token: refreshToken }),
+    });
+
+    if (!res.ok) throw new Error('Refresh failed');
+
+    const data = await res.json();
+    if (data.accessToken) {
+      sessionStorage.setItem('accessToken', data.accessToken);
+      return data.accessToken;
+    } else {
+      sessionStorage.clear();
+      return null;
     }
+  } catch (err) {
+    console.error('Token refresh error', err);
+    sessionStorage.clear();
+    return null;
+  }
+};
+
+// Ensure valid access token
+export const ensureAccessToken = async () => {
+  let token = sessionStorage.getItem('accessToken');
+  if (!token) return null;
+
+  const payload = decodeJwt(token);
+  const now = Math.floor(Date.now() / 1000);
+
+  if (!payload || payload.exp <= now) {
+    token = await refreshAccessToken();
+  }
+
+  return token;
+};
+
+// Main API call function
+export const apiCall = async (url, options = {}) => {
+  if (!isPublicPath(url)) {
+    const token = await ensureAccessToken();
+    if (!token) throw new Error('No valid access token');
+
+    options.headers = {
+      ...options.headers,
+      Authorization: `Bearer ${token}`,
+      'Content-Type': 'application/json',
+    };
   } else {
-    // For public endpoints, make sure no Authorization header is set
-    delete config.headers['Authorization'];
+    options.headers = {
+      ...options.headers,
+      'Content-Type': 'application/json',
+    };
   }
 
-  return config;
-}, error => {
-  return Promise.reject(error);
-});
-
-// Response interceptor - handle 401 and try refresh token flow
-api.interceptors.response.use(
-  response => response,
-  async error => {
-    const originalRequest = error.config;
-
-    if (error.response?.status === 401 && !originalRequest._retry) {
-      originalRequest._retry = true;
-
-      try {
-        const refreshToken = localStorage.getItem('refreshToken');
-        if (!refreshToken) throw new Error('No refresh token available');
-
-        // Call refresh token endpoint
-        const res = await axios.post(
-          'http://localhost:8082/api/v1/token/refresh',
-          { token: refreshToken },
-          { headers: { 'Content-Type': 'application/json', Accept: 'application/json' } }
-        );
-
-        const newAccessToken = res.data.accessToken;
-        // Save new access token
-        localStorage.setItem('accessToken', newAccessToken);
-
-        // Retry original request with new token
-        originalRequest.headers['Authorization'] = 'Bearer ' + newAccessToken;
-        return axios(originalRequest);
-      } catch (refreshError) {
-        // Refresh failed - clear tokens and redirect to login
-        localStorage.removeItem('accessToken');
-        localStorage.removeItem('refreshToken');
-        window.location.href = '/login';
-      }
-    }
-
-    return Promise.reject(error);
+  const res = await fetch(url, options);
+  if (!res.ok) {
+    const errorData = await res.json().catch(() => null);
+    const error = new Error('API call failed');
+    error.response = errorData || res.statusText;
+    throw error;
   }
-);
 
-export default api;
+  return res.json();
+};
