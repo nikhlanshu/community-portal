@@ -59,16 +59,13 @@ function LoginPage() {
       if (response.ok) {
         const data = await response.json();
 
-        // Check for tokens and store them in localStorage
         if (data.idToken && data.accessToken) {
-          sessionStorage.setItem('accessToken', data.accessToken);
-          sessionStorage.setItem('idToken', data.idToken);
           let userFromToken, accessPayload;
           try {
             userFromToken = jwtDecode(data.idToken);
             accessPayload = jwtDecode(data.accessToken);
-          } catch (decodeError) {
-            setGlobalError('Failed to decode authentication token.');
+          } catch (err) {
+            setGlobalError('Failed to decode token.');
             setLoading(false);
             return;
           }
@@ -76,23 +73,19 @@ function LoginPage() {
           userFromToken.roles = accessPayload.roles || [];
           userFromToken.status = accessPayload.status;
 
-          // Save user info in your auth context
-          login(userFromToken);
+          // Save user info + tokens in AuthContext & sessionStorage
+          login(userFromToken, {
+            accessToken: data.accessToken,
+            idToken: data.idToken,
+          });
 
           setGlobalError('');
-          setTimeout(() => navigate('/dashboard'), 800);
+          setTimeout(() => navigate('/dashboard'), 500);
         } else {
           setGlobalError('Did not receive login information.');
         }
-      } else {
-        let errData;
-        try {
-          errData = await response.json();
-        } catch {
-          errData = null;
-        }
-        setGlobalError((errData && errData.message) || 'Invalid email or password.');
       }
+
     } catch (err) {
       setGlobalError('An unexpected error occurred. Please try again later.');
     } finally {
@@ -109,11 +102,10 @@ function LoginPage() {
         </div>
         {globalError && (
           <div
-            className={`px-4 py-3 rounded relative mb-6 border ${
-              globalError.includes('successful')
+            className={`px-4 py-3 rounded relative mb-6 border ${globalError.includes('successful')
                 ? 'bg-green-100 border-green-400 text-green-700'
                 : 'bg-red-100 border-red-400 text-red-700'
-            }`}
+              }`}
             role="alert"
           >
             <strong className="font-bold">{globalError.includes('successful') ? 'Success!' : 'Error!'}</strong>
@@ -133,9 +125,8 @@ function LoginPage() {
                 id="email"
                 value={formData.email}
                 onChange={handleInputChange}
-                className={`pl-10 mt-1 block w-full px-4 py-3 border ${
-                  formErrors.email ? 'border-red-500' : 'border-gray-300'
-                } rounded-lg shadow-sm focus:ring-indigo-500 focus:border-indigo-500 text-gray-900 placeholder-gray-400 text-lg`}
+                className={`pl-10 mt-1 block w-full px-4 py-3 border ${formErrors.email ? 'border-red-500' : 'border-gray-300'
+                  } rounded-lg shadow-sm focus:ring-indigo-500 focus:border-indigo-500 text-gray-900 placeholder-gray-400 text-lg`}
                 placeholder="you@example.com"
                 required
               />
@@ -154,9 +145,8 @@ function LoginPage() {
                 id="password"
                 value={formData.password}
                 onChange={handleInputChange}
-                className={`pl-10 mt-1 block w-full px-4 py-3 border ${
-                  formErrors.password ? 'border-red-500' : 'border-gray-300'
-                } rounded-lg shadow-sm focus:ring-indigo-500 focus:border-indigo-500 text-gray-900 text-lg`}
+                className={`pl-10 mt-1 block w-full px-4 py-3 border ${formErrors.password ? 'border-red-500' : 'border-gray-300'
+                  } rounded-lg shadow-sm focus:ring-indigo-500 focus:border-indigo-500 text-gray-900 text-lg`}
                 placeholder="********"
                 required
               />
