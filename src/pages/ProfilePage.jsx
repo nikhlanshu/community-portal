@@ -11,7 +11,7 @@ function ProfilePage() {
 
   const [address, setAddress] = useState({});
   const [mobile, setMobile] = useState("");
-  const accessToken = localStorage.getItem('accessToken');
+  const accessToken = sessionStorage.getItem('accessToken');
   console.log("something happened");
   console.log("token ",token);
 
